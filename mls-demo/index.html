@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+	    <title>MLS Jersey Number Bubble Chart</title>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+		<style>
+			text {
+				font-family: sans-serif;
+				text-anchor: middle;
+			}
+
+			.node:hover circle {
+				/*
+				stroke is basically the border of an SVG shape
+				*/
+				stroke: #000;
+				stroke-width: 1.2px;
+			}
+		</style>
+	</head>
+
+	<body>
+		<!-- the base SVG element -->
+		<svg width="800" height="800"><g transform="translate(1,1)"></g></svg>
+
+		<script src="https://d3js.org/d3.v4.min.js"></script>
+		<script type="text/javascript">
+			// init vars
+			var svg = d3.select("svg"),
+				// the '+' coerces strings to numbers. neat!
+				// although I don't know why it's necessary
+				width = +svg.attr("width"),
+				height = +svg.attr("height");
+
+			// built in circle packing layout
+			// sweet things it does:
+			//   1. automatically scales nodes based on data values and desired layout size
+			//   2. calculates r, cy, cx based on data values
+			//   3. probably some other stuff
+			var pack = d3.pack()
+				// sets the size of the pack group
+				.size([width - 2, height - 2])
+				// padding between circle nodes
+				.padding(3);
+
+			// Ok so I want colored circles.
+			// There's many ways to do that, but one
+			// that d3 provides is color scales.
+			// Essentially it maps values to colors.
+			// Our data is ordinal, so we first create
+			// an ordinal scale,
+			var color = d3.scaleOrdinal()
+				// then we assign a color scheme
+				// to the range of the scale.
+				.range(d3.schemeCategory20);
+			// Later, when it's time to colorize a cirlce,
+			// we'll pass in a value to the color() function,
+			// and it will map that value to the associated color
+			// in the chosen scheme.
+
+
+			// d3's ajax helpers are pretty similar to jQuery
+			d3.json('jersey-numbers.json', function (err, data) {
+				if (err) {
+					console.log(err);
+				}
+
+				/********
+				d3.hierarchy loads data for use in a hierarchical layout
+				(like pack! or tree! or whatever).
+				It must be passed an object specifiying the children of root.
+				In this instance that's just the data object,
+				but if you had a JSON object like:
+					{
+					"title": "list of taco restaurants",
+					"date": "8/5/16",
+					"author": "dan",
+					"contents": ***DATA IS HERE***
+					}
+				then you'd do {children: data.contents}.
+				I'm thinking of something like a mongoDB document
+				that might have metadata or w/e.
+				Remember that later you can still access data.title, data.author, etc
+				for titling your chart or whatever you need.
+				*******/
+				var root = d3.hierarchy({children: data})
+					// you have to call sum on the data that you want the layout to
+					// be organized by, so that it can calculate the scale, etc
+					.sum(function(d) { return d.count; });
+					// You can sort data, but I have not found it very useful
+					// for the pack layout.
+					// .sort(function(a, b) { return b.count - a.count; });
+
+				// pass the hierarchical data into the pack layout that we defined earlier
+				pack(root);
+
+				// pretty standard data join,
+				// it just uses the computed x and y
+				// from the pack layout to, uh, layout
+				// the svg <g> nodes...
+				var node = svg.select("g")
+					.selectAll("g")
+						.data(root.children)
+					.enter().append("g")
+						.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+						.attr("class", "node");
+
+				// ...and then appends circles to those nodes,
+				// using the pack layout calculated radius to size them
+				node.append("circle")
+					.attr("id", function(d) { return "jerseyNumber-" + d.data.jerseyNum; })
+					.attr("r", function(d) { return d.r; })
+					.style("fill", function(d, i) { return color(d.data.count); });
+
+				node.append("text")
+					.text(function(d) { return d.data.jerseyNum });
+
+			});
+
+	 	</script>
+	 	<script src="http://localhost:35729/livereload.js"></script>
+
+	</body>
+</html>

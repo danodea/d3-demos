@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<title>d3 SVG Chart</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+		<style>
+
+			.chart rect {
+				fill: steelblue;
+			}
+
+			.chart text {
+				fill: white;
+				font: 10px sans-serif;
+				text-anchor: end;
+			}
+
+		</style>
+	</head>
+
+	<body>
+	<!-- Example of a programmatically generated bar chart using d3 and SVG -->
+		<svg class="chart"></svg>
+
+		<script src="http://localhost:35729/livereload.js"></script>
+		<script src="https://d3js.org/d3.v4.min.js"></script>
+		<script type="text/javascript">
+
+			// init vars
+			var data = [4, 8, 15, 16, 23, 42],
+				width = 420,
+				barHeight = 20;
+
+			// bar scaling function
+			var x = d3.scaleLinear()
+				.domain([0, d3.max(data)])
+				.range([0, width]);
+
+			// This time we're making an SVG
+			// so we need to set the size of the SVG element
+			// to be large enough for our dataset
+			var chart =
+				d3.select(".chart")
+					.attr("width", width)
+					.attr("height", barHeight * data.length);
+
+			// Very similar to the d3 HTML example,
+			// but now we are creating <g> (group) elements
+			// from our data nodes.
+			// Each group will contain a:
+			// 	rect (the bar)
+			// 	text (the label)
+			var bar =
+				chart.selectAll("g")
+					.data(data)
+				.enter().append("g")
+					// All SVG elements must be positioned relative to the
+					// top left of the containing element.
+					.attr("transform", function(d, i) { return "translate(0," + i * barHeight + ")"; });
+
+			// making the bars
+			bar.append("rect")
+				.attr("width", x)
+				.attr("height", barHeight - 1);
+
+			// adding the text
+			bar.append("text")
+				.attr("x", function(d) { return x(d) - 3; })
+				.attr("y", barHeight / 2)
+				.attr("dy", ".35em")
+				.text(function(d) { return d; });
+
+		</script>
+
+	</body>
+</html>

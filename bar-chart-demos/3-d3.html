@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+	    <title>d3 HTML Chart</title>
+	    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+		<style>
+
+			.chart div {
+				font: 10px sans-serif;
+				background-color: steelblue;
+				text-align: right;
+				padding: 3px;
+				margin: 1px;
+				color: white;
+			}
+
+		</style>
+	</head>
+
+	<body>
+	<!-- Example of a programmatically generated bar chart using d3 -->
+		<div class="chart" />
+
+		<script src="https://d3js.org/d3.v4.min.js"></script>
+		<script type="text/javascript">
+
+			// data stored in an array
+			var data = [4, 8, 15, 16, 23, 42];
+
+			// Scale to fit
+			// Instead of hardcoding in a "magic number"
+			// ie width = 10 * d + "px"
+			// we can use a built in function to scale
+			var xWidth = d3.scaleLinear()
+	    		.domain([0, d3.max(data)])
+	    		.range([0, 420]);
+
+			// This pattern is called a "data join"
+			// We are joining data to nodes
+			// and displaying the data by manipulating those nodes
+			// and creating DOM elements to hold them
+
+			d3.select(".chart") // initial selector
+				.selectAll("div") // select children (or show our intention to create child elements of a certain type)
+					.data(data) // join the data with those elements
+				// The .data() function returns Enter, Update, and Exit selections
+				// - Enter contains placeholder nodes for new data,
+				// - Update contains nodes that will be updated,
+				// - Exit contains nodes that no longer have corresponding data
+				.enter().append("div") // For each new piece of data, append a div
+					// and then style and display with passed in data
+					.style("width", function(d) { return 10 * d + "px"; })
+					.text(function(d) { return d; });
+
+	 	</script>
+	 	<script src="http://localhost:35729/livereload.js"></script>
+
+	</body>
+</html>
